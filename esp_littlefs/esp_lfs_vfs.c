@@ -162,22 +162,6 @@ static void fill_info(struct lfs_info *info, struct stat *st)
     }
 }
 
-#if 0
-int vlfs_fstat(void *ctx, int fd, struct stat *st)
-{
-    lfs_file_t *f = vlfs_file_p(ctx, fd); if (!f) { return -1; }
-    struct lfs_info info;
-    /* filename = ? */
-    int err = lfs_stat(ctx, filename, &info);
-    if (err < 0) {
-        errno = vlfs_tr_error(err);
-        return -1;
-    }
-    fill_info(&info, st);
-    return 0;
-}
-#endif
-
 int vlfs_stat(void *ctx, const char *path, struct stat *st)
 {
     struct lfs_info info;
@@ -254,7 +238,6 @@ static const esp_vfs_t the_littlefs_vfs_funcs = {
     .fsync_p = vlfs_fsync,
     .read_p = vlfs_read,
     .lseek_p = vlfs_lseek,
-    //.fstat_p = vlfs_fstat,
 
 #if 0 && defined(CONFIG_VFS_SUPPORT_DIR)
     .truncate_p = vlfs_truncate, /* inside wrong ifdef in esp_vfs.h */

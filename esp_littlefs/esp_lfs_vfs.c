@@ -7,8 +7,6 @@
 #include "littlefs/lfs.h"
 #include "vfs/vfs_littlefs.h"
 
-//#define WANT_PREAD_PWRITE
-
 static const char *TAG = "lfs_vfs";
 
 typedef struct vlfs_ctx_s {
@@ -192,56 +190,6 @@ int vlfs_stat(void *ctx, const char *path, struct stat *st)
     return 0;
 }
 
-#ifdef WANT_PREAD_PWRITE
-ssize_t vlfs_pread(void *ctx, int fd, void *dst, size_t size, off_t offset)
-{
-    if (offset < 0) {
-        errno = EINVAL;
-        return -1;
-    }
-    lfs_file_t *f = vlfs_file_p(ctx, fd); if (!f) { return -1; }
-    lfs_soff_t oldpos = lfs_file_tell(ctx, f);
-    if (oldpos < 0) {
-        errno = vlfs_tr_error(oldpos);
-        return -1;
-    }
-    lfs_soff_t newpos = lfs_file_seek(ctx, f, offset, LFS_SEEK_SET);
-    int err = newpos;
-    ssize_t bytes = -1;
-    if (newpos == offset) {
-        bytes = lfs_file_read(ctx, f, dst, size);
-        err = bytes;
-    }
-    errno = vlfs_tr_error(err);
-    lfs_file_seek(ctx, f, oldpos, LFS_SEEK_SET);
-    return bytes;
-}
-
-ssize_t vlfs_pwrite(void *ctx, int fd, const void *src, size_t size, off_t offset)
-{
-    if (offset < 0) {
-        errno = EINVAL;
-        return -1;
-    }
-    lfs_file_t *f = vlfs_file_p(fd); if (!f) { return -1; }
-    lfs_soff_t oldpos = lfs_file_tell(ctx, f);
-    if (oldpos < 0) {
-        errno = vlfs_tr_error(oldpos);
-        return -1;
-    }
-    lfs_soff_t newpos = lfs_file_seek(ctx, f, offset, LFS_SEEK_SET);
-    int err = newpos;
-    ssize_t bytes = -1;
-    if (newpos == offset) {
-        bytes = lfs_file_write(ctx, f, src, size);
-        err = bytes;
-    }
-    errno = vlfs_tr_error(err);
-    lfs_file_seek(ctx, f, oldpos, LFS_SEEK_SET);
-    return bytes;
-}
-#endif // WANT_PREAD_PWRITE
-
 int vlfs_unlink(void *ctx, const char *path)
 {
     /* should we bother checking if the file is open?
@@ -307,13 +255,6 @@ static const esp_vfs_t the_littlefs_vfs_funcs = {
     .read_p = vlfs_read,
     .lseek_p = vlfs_lseek,
     //.fstat_p = vlfs_fstat,
-
-#ifdef WANT_PREAD_PWRITE
-    .pread_p = vlfs_pread,
-#ifndef LFS_READONLY
-    .pwrite_p = vlfs_pwrite,
-#endif
-#endif
 
 #if 0 && defined(CONFIG_VFS_SUPPORT_DIR)
     .truncate_p = vlfs_truncate, /* inside wrong ifdef in esp_vfs.h */

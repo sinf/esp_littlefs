@@ -231,6 +231,17 @@ int vlfs_closedir(void *ctx, DIR* newlib_d)
     return vlfs_set_errno(err);
 }
 
+int vlfs_truncate(void *ctx, const char *path, off_t length)
+{
+    int fd = vlfs_open(ctx, path, O_WRONLY|O_CREAT, 0644);
+    if (fd < 0) {
+        return fd;
+    }
+    int err = lfs_file_truncate(ctx, vlfs_file_p(ctx, fd), length);
+    vlfs_close(ctx, fd);
+    return vlfs_set_errno(err);
+}
+
 static const esp_vfs_t the_littlefs_vfs_funcs = {
     .flags = ESP_VFS_FLAG_CONTEXT_PTR,
     .open_p = vlfs_open,
@@ -239,14 +250,11 @@ static const esp_vfs_t the_littlefs_vfs_funcs = {
     .read_p = vlfs_read,
     .lseek_p = vlfs_lseek,
 
-#if 0 && defined(CONFIG_VFS_SUPPORT_DIR)
-    .truncate_p = vlfs_truncate, /* inside wrong ifdef in esp_vfs.h */
-#endif
-
 #ifndef LFS_READONLY
     .write_p = vlfs_write,
 #ifdef CONFIG_VFS_SUPPORT_DIR
     .unlink_p = vlfs_unlink, /* inside wrong ifdef in esp_vfs.h */
+    .truncate_p = vlfs_truncate, /* inside wrong ifdef in esp_vfs.h */
 #endif
 #endif // LFS_READONLY
 

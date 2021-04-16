@@ -3,6 +3,7 @@
 #include "esp_types.h"
 #include "esp_log.h"
 #include "esp_compiler.h"
+#include "esp_heap_caps.h"
 #include "driver/sdmmc_types.h"
 #include "sdmmc_cmd.h" // components/sdmmc/include/sdmmc_cmd.h
 #include "littlefs/lfs.h"
@@ -170,6 +171,13 @@ struct lfs_config *lfs_setup_sdmmc(sdmmc_card_t *card)
     c->block_cycles = 347; // block-level wear leveling parameter
     c->cache_size = bs;
     c->lookahead_size = 256; // multiple of 8
+
+    if (1) {
+        c->read_buffer = heap_caps_malloc(c->cache_size, MALLOC_CAP_DMA);
+        c->prog_buffer = heap_caps_malloc(c->cache_size, MALLOC_CAP_DMA);
+        if (c->read_buffer) ESP_LOGI(TAG, "Alloc'd a DMA-capable read cache");
+        if (c->prog_buffer) ESP_LOGI(TAG, "Alloc'd a DMA-capable write cache");
+    }
 
     ESP_LOGI(TAG, "Read size: %d", (int) rd);
     ESP_LOGI(TAG, "Program size: %d", (int) pg);

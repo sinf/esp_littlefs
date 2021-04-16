@@ -1,0 +1,42 @@
+menu "littlefs filesystem support"
+
+    config LFS_THREADSAFE_DEF
+        bool "Thread safety"
+        default y
+        help
+            todo write help
+
+    config LFS_READONLY
+        bool "Read-only"
+        default n
+        help
+            Disable write functions to reduce code size
+
+    config LFS_NAME_MAX
+        int "Maximum filename size"
+        default 255
+        range 12 1022
+        help
+            Maximum name size in bytes, may be redefined to reduce the size of the
+            info struct. Limited to <= 1022. Stored in superblock and must be
+            respected by other littlefs drivers.
+
+    config LFS_FILE_MAX
+        int "Maximum filesize"
+        default 2147483647
+        range 1024 4294967296
+        help
+            Maximum size of a file in bytes, may be redefined to limit to support other
+            drivers. Limited on disk to <= 4294967296. However, above 2147483647 the
+            functions lfs_file_seek, lfs_file_size, and lfs_file_tell will return
+            incorrect values due to using signed integers. Stored in superblock and
+            must be respected by other littlefs drivers.
+
+    config LFS_ATTR_MAX
+        int "Maximum size of custom attributes"
+        default 1022
+        range 0 1022
+        help
+            Maximum size of custom attributes in bytes, may be redefined, but there is
+            no real benefit to using a smaller LFS_ATTR_MAX. Limited to <= 1022.
+endmenu

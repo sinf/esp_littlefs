@@ -63,7 +63,11 @@ static inline uint32_t lfs_tole32(uint32_t a) { return htole32(a); }
 static inline uint32_t lfs_frombe32(uint32_t a) { return be32toh(a); }
 static inline uint32_t lfs_tobe32(uint32_t a) { return htobe32(a); }
 
-uint32_t lfs_crc(uint32_t crc, const void *buffer, size_t size);
+// crc32
+#include "esp32/rom/crc.h" /* components/esp_rom/include/esp32/rom/crc.h */
+inline uint32_t lfs_crc(uint32_t crc, const void *buffer, size_t size) {
+    return ~crc32_le(~crc, buffer, size);
+}
 
 // Allocate memory, only used if buffers are not provided to littlefs
 // Note, memory must be 64-bit aligned

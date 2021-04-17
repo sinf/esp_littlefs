@@ -9,6 +9,6 @@ set(srcs
 
 idf_component_register(SRCS ${srcs}
 INCLUDE_DIRS vfs esp_littlefs littlefs .
-REQUIRES esp32 esp_common sdmmc vfs log newlib driver
+REQUIRES esp32 esp_common esp_rom sdmmc vfs log newlib driver
 )
 

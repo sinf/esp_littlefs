@@ -242,6 +242,11 @@ int vlfs_truncate(void *ctx, const char *path, off_t length)
     return vlfs_set_errno(err);
 }
 
+int vlfs_rename(void *ctx, const char *old, const char *new)
+{
+    return vlfs_set_errno(lfs_rename(ctx, old, new));
+}
+
 static const esp_vfs_t the_littlefs_vfs_funcs = {
     .flags = ESP_VFS_FLAG_CONTEXT_PTR,
     .open_p = vlfs_open,
@@ -255,13 +260,12 @@ static const esp_vfs_t the_littlefs_vfs_funcs = {
 #ifdef CONFIG_VFS_SUPPORT_DIR
     .unlink_p = vlfs_unlink, /* inside wrong ifdef in esp_vfs.h */
     .truncate_p = vlfs_truncate, /* inside wrong ifdef in esp_vfs.h */
+    .rename_p = vlfs_rename,
 #endif
 #endif // LFS_READONLY
 
 #ifdef CONFIG_VFS_SUPPORT_DIR
     .stat_p = vlfs_stat, /* inside wrong ifdef in esp_vfs.h */
-    // .link_p = vlfs_link, /* inside wrong ifdef in esp_vfs.h */
-    //.rename_p = vlfs_rename,
     .opendir_p = vlfs_opendir,
     .closedir_p = vlfs_closedir,
     .readdir_p = vlfs_readdir,
